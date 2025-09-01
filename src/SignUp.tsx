@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 interface FormState {
   name: string
+  nameKana: string
   email: string
   password: string
   confirm: string
@@ -10,6 +11,7 @@ interface FormState {
 function SignUp() {
   const [form, setForm] = useState<FormState>({
     name: '',
+    nameKana: '',
     email: '',
     password: '',
     confirm: '',
@@ -35,6 +37,10 @@ function SignUp() {
       <label>
         名前
         <input type="text" name="name" value={form.name} onChange={handleChange} />
+      </label>
+      <label>
+        フリガナ
+        <input type="text" name="nameKana" value={form.nameKana} onChange={handleChange} />
       </label>
       <label>
         メールアドレス
