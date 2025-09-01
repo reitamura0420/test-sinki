@@ -1,4 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Kuroshiro from 'kuroshiro'
+import KuromojiAnalyzer from 'kuroshiro-analyzer-kuromoji'
+import { useMemo } from 'react'
 
 interface FormState {
   name: string
@@ -22,10 +25,21 @@ function SignUp() {
       String.fromCharCode(ch.charCodeAt(0) + 0x60)
     )
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const kuroshiro = useMemo(() => new Kuroshiro(), [])
+  useEffect(() => {
+    kuroshiro.init(new KuromojiAnalyzer()).catch(console.error)
+  }, [kuroshiro])
+
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (name === 'name') {
-      setForm((prev) => ({ ...prev, name: value, nameKana: toKatakana(value) }))
+      let kana = toKatakana(value)
+      try {
+        kana = await kuroshiro.convert(value, { to: 'katakana' })
+      } catch {
+        /* ignore conversion errors */
+      }
+      setForm((prev) => ({ ...prev, name: value, nameKana: kana }))
     } else if (name === 'nameKana') {
       setForm((prev) => ({ ...prev, nameKana: toKatakana(value) }))
     } else {
