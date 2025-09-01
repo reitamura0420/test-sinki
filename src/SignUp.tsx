@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { toKatakana } from 'wanakana'
 
 interface FormState {
   name: string
@@ -22,7 +23,7 @@ function SignUp() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (name === 'name') {
-      setForm((prev) => ({ ...prev, name: value }))
+      setForm((prev) => ({ ...prev, name: value, nameKana: toKatakana(value) }))
     } else {
       setForm((prev) => ({ ...prev, [name]: value }))
     }
