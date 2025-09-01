@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import AutoKana from 'vanilla-autokana'
+import useKana from 'react-use-kana'
 import { toKatakana } from 'wanakana'
 
 interface FormState {
@@ -20,14 +20,11 @@ function SignUp() {
   })
 
   const nameRef = useRef<HTMLInputElement>(null)
-  const nameKanaRef = useRef<HTMLInputElement>(null)
+  const kana = useKana(nameRef, { katakana: true })
 
   useEffect(() => {
-    if (nameRef.current && nameKanaRef.current) {
-      const autoKana = AutoKana.bind(nameRef.current, nameKanaRef.current, { katakana: true })
-      return () => autoKana.unbind()
-    }
-  }, [])
+    setForm((prev) => ({ ...prev, nameKana: kana }))
+  }, [kana])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -69,7 +66,6 @@ function SignUp() {
           name="nameKana"
           value={form.nameKana}
           onChange={handleChange}
-          ref={nameKanaRef}
         />
       </label>
       <label>
