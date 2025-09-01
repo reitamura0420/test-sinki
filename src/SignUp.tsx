@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import AutoKana from 'vanilla-autokana'
 import { toKatakana } from 'wanakana'
 
 interface FormState {
@@ -18,10 +19,20 @@ function SignUp() {
     confirm: '',
   })
 
+  const nameRef = useRef<HTMLInputElement>(null)
+  const nameKanaRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (nameRef.current && nameKanaRef.current) {
+      const autoKana = AutoKana.bind(nameRef.current, nameKanaRef.current, { katakana: true })
+      return () => autoKana.unbind()
+    }
+  }, [])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (name === 'name') {
-      setForm((prev) => ({ ...prev, name: value, nameKana: toKatakana(value) }))
+      setForm((prev) => ({ ...prev, name: value }))
     } else if (name === 'nameKana') {
       setForm((prev) => ({ ...prev, nameKana: toKatakana(value) }))
     } else {
@@ -43,11 +54,23 @@ function SignUp() {
       <h2>新規登録</h2>
       <label>
         名前
-        <input type="text" name="name" value={form.name} onChange={handleChange} />
+        <input
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          ref={nameRef}
+        />
       </label>
       <label>
         フリガナ
-        <input type="text" name="nameKana" value={form.nameKana} onChange={handleChange} />
+        <input
+          type="text"
+          name="nameKana"
+          value={form.nameKana}
+          onChange={handleChange}
+          ref={nameKanaRef}
+        />
       </label>
       <label>
         メールアドレス

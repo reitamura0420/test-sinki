@@ -6,6 +6,10 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "vanilla-autokana": ["src/vanilla-autokana.ts"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
