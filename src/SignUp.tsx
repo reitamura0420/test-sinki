@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { toKatakana } from 'wanakana'
+import { toKatakana, isKanji } from 'wanakana'
 
 interface FormState {
   name: string
@@ -18,10 +18,13 @@ function SignUp() {
     confirm: '',
   })
 
+  const containsKanji = (text: string) => [...text].some((ch) => isKanji(ch))
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (name === 'name') {
-      setForm((prev) => ({ ...prev, name: value, nameKana: toKatakana(value) }))
+      const nameKana = containsKanji(value) ? '' : toKatakana(value)
+      setForm((prev) => ({ ...prev, name: value, nameKana }))
     } else if (name === 'nameKana') {
       setForm((prev) => ({ ...prev, nameKana: toKatakana(value) }))
     } else {
