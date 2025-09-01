@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "vanilla-autokana": ["src/vanilla-autokana.ts"]
+      "react-use-kana": ["src/react-use-kana.ts"]
     },
 
     /* Bundler mode */
