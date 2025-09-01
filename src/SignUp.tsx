@@ -17,9 +17,20 @@ function SignUp() {
     confirm: '',
   })
 
+  const toKatakana = (input: string) =>
+    input.replace(/[\u3041-\u3096]/g, (ch) =>
+      String.fromCharCode(ch.charCodeAt(0) + 0x60)
+    )
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
+    if (name === 'name') {
+      setForm((prev) => ({ ...prev, name: value, nameKana: toKatakana(value) }))
+    } else if (name === 'nameKana') {
+      setForm((prev) => ({ ...prev, nameKana: toKatakana(value) }))
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {
