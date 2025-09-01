@@ -1,6 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
-import useKana from 'react-use-kana'
-import { toKatakana } from 'wanakana'
+import { useState, useRef } from 'react'
 
 interface FormState {
   name: string
@@ -20,18 +18,11 @@ function SignUp() {
   })
 
   const nameRef = useRef<HTMLInputElement>(null)
-  const kana = useKana(nameRef, { katakana: true })
-
-  useEffect(() => {
-    setForm((prev) => ({ ...prev, nameKana: kana }))
-  }, [kana])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (name === 'name') {
       setForm((prev) => ({ ...prev, name: value }))
-    } else if (name === 'nameKana') {
-      setForm((prev) => ({ ...prev, nameKana: toKatakana(value) }))
     } else {
       setForm((prev) => ({ ...prev, [name]: value }))
     }
