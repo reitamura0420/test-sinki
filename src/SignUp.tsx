@@ -143,6 +143,11 @@ function SignUp() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/
+    if (!passwordRegex.test(form.password)) {
+      alert('パスワードは8文字以上で英字と数字を含めてください')
+      return
+    }
     if (form.password !== form.confirm) {
       alert('パスワードが一致しません')
       return
@@ -224,6 +229,8 @@ function SignUp() {
           name="password"
           value={form.password}
           onChange={handleChange}
+          pattern="(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}"
+          title="8文字以上で英字と数字を含めてください"
         />
         <label htmlFor="password">パスワード</label>
       </div>
@@ -234,6 +241,8 @@ function SignUp() {
           name="confirm"
           value={form.confirm}
           onChange={handleChange}
+          pattern="(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{8,}"
+          title="8文字以上で英字と数字を含めてください"
         />
         <label htmlFor="confirm">パスワード（確認）</label>
       </div>
