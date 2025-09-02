@@ -1,4 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+interface KuroshiroInstance {
+  init(analyzer: unknown): Promise<void>
+  convert(text: string, options: { to: string }): Promise<string>
+}
+
+interface KuroshiroConstructor {
+  new (): KuroshiroInstance
+}
+
+interface KuromojiConstructor {
+  new (): unknown
+}
 
 interface FormState {
   name: string
@@ -16,6 +29,7 @@ function SignUp() {
     password: '',
     confirm: '',
   })
+  const kuroshiroRef = useRef<KuroshiroInstance | null>(null)
 
   useEffect(() => {
     const nameInput = document.getElementById('name') as HTMLInputElement | null
@@ -51,19 +65,48 @@ function SignUp() {
     }
 
     nameInput.addEventListener('compositionupdate', handleCompositionUpdate)
-    nameInput.addEventListener('beforeinput', handleBeforeInput as any)
+    nameInput.addEventListener(
+      'beforeinput',
+      handleBeforeInput as unknown as EventListener,
+    )
     nameInput.addEventListener('compositionend', handleCompositionEnd)
 
     return () => {
       nameInput.removeEventListener('compositionupdate', handleCompositionUpdate)
-      nameInput.removeEventListener('beforeinput', handleBeforeInput as any)
+      nameInput.removeEventListener(
+        'beforeinput',
+        handleBeforeInput as unknown as EventListener,
+      )
       nameInput.removeEventListener('compositionend', handleCompositionEnd)
     }
+  }, [])
+
+  useEffect(() => {
+    const init = async () => {
+      const { Kuroshiro, KuromojiAnalyzer } =
+        window as unknown as {
+          Kuroshiro?: KuroshiroConstructor
+          KuromojiAnalyzer?: KuromojiConstructor
+        }
+      if (!Kuroshiro || !KuromojiAnalyzer) return
+      const k = new Kuroshiro()
+      await k.init(new KuromojiAnalyzer())
+      kuroshiroRef.current = k
+    }
+    init()
   }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleConvert = async () => {
+    if (!kuroshiroRef.current) return
+    const kana = await kuroshiroRef.current.convert(form.name, {
+      to: 'katakana',
+    })
+    setForm((prev) => ({ ...prev, nameKana: kana }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -88,6 +131,13 @@ function SignUp() {
         />
         <label htmlFor="name">名前</label>
       </div>
+      <button
+        type="button"
+        className="btn waves-effect waves-light"
+        onClick={handleConvert}
+      >
+        カナ変換
+      </button>
       <div className="input-field">
         <input
           id="nameKana"
