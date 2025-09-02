@@ -1,5 +1,4 @@
-import { useState, useRef } from 'react'
-import { toKatakana } from 'wanakana'
+import { useState, useEffect } from 'react'
 
 interface FormState {
   name: string
@@ -18,15 +17,26 @@ function SignUp() {
     confirm: '',
   })
 
-  const nameRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    const autoKana = (window as any).autoKana
+    if (autoKana) {
+      autoKana('#name', '#nameKana', { katakana: true })
+    }
+    const kanaInput = document.getElementById('nameKana') as HTMLInputElement | null
+    const syncKana = () => {
+      if (kanaInput) {
+        setForm((prev) => ({ ...prev, nameKana: kanaInput.value }))
+      }
+    }
+    kanaInput?.addEventListener('input', syncKana)
+    return () => {
+      kanaInput?.removeEventListener('input', syncKana)
+    }
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    if (name === 'name') {
-      setForm((prev) => ({ ...prev, name: value, nameKana: toKatakana(value) }))
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }))
-    }
+    setForm((prev) => ({ ...prev, [name]: value }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,40 +49,55 @@ function SignUp() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="signup-form">
-      <h2>新規登録</h2>
-      <label>
-        名前
+    <form onSubmit={handleSubmit} className="container">
+      <h2 className="center-align">新規登録</h2>
+      <div className="input-field">
         <input
+          id="name"
           type="text"
           name="name"
           value={form.name}
           onChange={handleChange}
-          ref={nameRef}
         />
-      </label>
-      <label>
-        フリガナ
+        <label htmlFor="name">名前</label>
+      </div>
+      <div className="input-field">
+        <input id="nameKana" type="text" name="nameKana" onChange={handleChange} />
+        <label htmlFor="nameKana">フリガナ</label>
+      </div>
+      <div className="input-field">
         <input
-          type="text"
-          name="nameKana"
-          value={form.nameKana}
+          id="email"
+          type="email"
+          name="email"
+          value={form.email}
           onChange={handleChange}
         />
-      </label>
-      <label>
-        メールアドレス
-        <input type="email" name="email" value={form.email} onChange={handleChange} />
-      </label>
-      <label>
-        パスワード
-        <input type="password" name="password" value={form.password} onChange={handleChange} />
-      </label>
-      <label>
-        パスワード（確認）
-        <input type="password" name="confirm" value={form.confirm} onChange={handleChange} />
-      </label>
-      <button type="submit">登録</button>
+        <label htmlFor="email">メールアドレス</label>
+      </div>
+      <div className="input-field">
+        <input
+          id="password"
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+        />
+        <label htmlFor="password">パスワード</label>
+      </div>
+      <div className="input-field">
+        <input
+          id="confirm"
+          type="password"
+          name="confirm"
+          value={form.confirm}
+          onChange={handleChange}
+        />
+        <label htmlFor="confirm">パスワード（確認）</label>
+      </div>
+      <button className="btn waves-effect waves-light" type="submit">
+        登録
+      </button>
     </form>
   )
 }
