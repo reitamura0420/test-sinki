@@ -43,6 +43,7 @@ function SignUp() {
     }
 
     const handleCompositionEnd = (e: CompositionEvent) => {
+      if (!/[ぁ-ん]/.test(e.data)) return
       const kana = toKatakana(e.data)
       setForm((prev) =>
         prev.nameKana === kana ? prev : { ...prev, nameKana: kana },
