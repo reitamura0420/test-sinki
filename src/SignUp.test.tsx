@@ -95,5 +95,23 @@ describe('SignUp IME input flow', () => {
     )
     ;(global as any).fetch = originalFetch
   })
+
+  it('alerts when password does not meet conditions', () => {
+    render(<SignUp />)
+    const passwordInput = screen.getByLabelText('パスワード') as HTMLInputElement
+    const confirmInput = screen.getByLabelText('パスワード（確認）') as HTMLInputElement
+    fireEvent.change(passwordInput, {
+      target: { value: 'short1', name: 'password' },
+    })
+    fireEvent.change(confirmInput, {
+      target: { value: 'short1', name: 'confirm' },
+    })
+    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {})
+    const submitButton = screen.getByRole('button', { name: '登録' })
+    fireEvent.click(submitButton)
+    expect(alertMock).toHaveBeenCalledWith(
+      'パスワードは8文字以上で英字と数字を含めてください',
+    )
+  })
 })
 
