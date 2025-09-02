@@ -1,5 +1,6 @@
+import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 import SignUp from './SignUp'
 
 describe('SignUp IME input flow', () => {
@@ -24,17 +25,22 @@ describe('SignUp IME input flow', () => {
     expect(kanaInput).toHaveValue('オオカ')
 
     // beforeinput with difference "わ"
-    fireEvent.beforeInput(nameInput, {
-      data: 'わ',
-      inputType: 'insertCompositionText',
-    } as any)
+    fireEvent(
+      nameInput,
+      new InputEvent('beforeinput', {
+        data: 'わ',
+        inputType: 'insertCompositionText',
+        bubbles: true,
+        cancelable: true,
+      }),
+    )
     expect(kanaInput).toHaveValue('ワ')
 
     fireEvent.compositionUpdate(nameInput, { data: 'おおかわ' })
     expect(kanaInput).toHaveValue('オオカワ')
 
-    // Step 4: compositionend
-    fireEvent.compositionEnd(nameInput, { data: 'おおかわ' })
+    // Step 4: compositionend produces kanji
+    fireEvent.compositionEnd(nameInput, { data: '大川' })
     expect(kanaInput).toHaveValue('オオカワ')
   })
 })
