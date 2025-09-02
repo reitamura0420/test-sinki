@@ -19,6 +19,8 @@ interface FormState {
   email: string
   password: string
   confirm: string
+  postalCode: string
+  address: string
 }
 
 function SignUp() {
@@ -28,6 +30,8 @@ function SignUp() {
     email: '',
     password: '',
     confirm: '',
+    postalCode: '',
+    address: '',
   })
   const kuroshiroRef = useRef<KuroshiroInstance | null>(null)
 
@@ -109,6 +113,34 @@ function SignUp() {
     setForm((prev) => ({ ...prev, nameKana: kana }))
   }
 
+  const handleAddressLookup = async () => {
+    if (!form.postalCode) return
+    try {
+      const res = await fetch(
+        `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${form.postalCode}`,
+      )
+      const data: {
+        status: number
+        results?: Array<{
+          address1: string
+          address2: string
+          address3: string
+        }>
+      } = await res.json()
+      const result = data.results?.[0]
+      if (!result) {
+        alert('住所が見つかりません')
+        return
+      }
+      setForm((prev) => ({
+        ...prev,
+        address: `${result.address1}${result.address2}${result.address3}`,
+      }))
+    } catch {
+      alert('住所検索に失敗しました')
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (form.password !== form.confirm) {
@@ -147,6 +179,33 @@ function SignUp() {
           onChange={handleChange}
         />
         <label htmlFor="nameKana">フリガナ</label>
+      </div>
+      <div className="input-field">
+        <input
+          id="postalCode"
+          type="text"
+          name="postalCode"
+          value={form.postalCode}
+          onChange={handleChange}
+        />
+        <label htmlFor="postalCode">郵便番号</label>
+      </div>
+      <button
+        type="button"
+        className="btn waves-effect waves-light"
+        onClick={handleAddressLookup}
+      >
+        住所自動補完
+      </button>
+      <div className="input-field">
+        <input
+          id="address"
+          type="text"
+          name="address"
+          value={form.address}
+          onChange={handleChange}
+        />
+        <label htmlFor="address">住所</label>
       </div>
       <div className="input-field">
         <input
