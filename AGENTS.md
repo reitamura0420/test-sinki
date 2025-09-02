@@ -1,2 +1,2 @@
-npm installは実行せず、node_moduluesはそのまま利用してください。
+ライブラリをインストールする際は、index.htmlにCDNを直接書き込んでください。更にpackage.jsonに記載だけしてnpm installはしないようにしてください。
 デザインはマテリアルデザインに準拠してください。
