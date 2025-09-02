@@ -13,8 +13,7 @@
   "dependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "materialize-css": "^1.0.0",
-    "vanilla-autokana": "^1.0.0"
+    "materialize-css": "^1.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
