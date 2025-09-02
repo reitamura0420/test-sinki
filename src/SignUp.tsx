@@ -18,19 +18,45 @@ function SignUp() {
   })
 
   useEffect(() => {
-    const autoKana = (window as any).autoKana
-    if (autoKana) {
-      autoKana('#name', '#nameKana', { katakana: true })
+    const nameInput = document.getElementById('name') as HTMLInputElement | null
+    if (!nameInput) return
+
+    const toKatakana = (text: string) =>
+      text.replace(/[ぁ-ん]/g, (ch) =>
+        String.fromCharCode(ch.charCodeAt(0) + 0x60),
+      )
+
+    const updateKana = (data: string | null) => {
+      if (!data) return
+      const kana = toKatakana(data)
+      setForm((prev) => ({ ...prev, nameKana: kana }))
     }
-    const kanaInput = document.getElementById('nameKana') as HTMLInputElement | null
-    const syncKana = () => {
-      if (kanaInput) {
-        setForm((prev) => ({ ...prev, nameKana: kanaInput.value }))
+
+    const handleCompositionUpdate = (e: CompositionEvent) => {
+      updateKana(e.data)
+    }
+
+    const handleBeforeInput = (e: InputEvent) => {
+      if (e.inputType === 'insertCompositionText') {
+        updateKana(e.data)
       }
     }
-    kanaInput?.addEventListener('input', syncKana)
+
+    const handleCompositionEnd = (e: CompositionEvent) => {
+      const kana = toKatakana(e.data)
+      setForm((prev) =>
+        prev.nameKana === kana ? prev : { ...prev, nameKana: kana },
+      )
+    }
+
+    nameInput.addEventListener('compositionupdate', handleCompositionUpdate)
+    nameInput.addEventListener('beforeinput', handleBeforeInput as any)
+    nameInput.addEventListener('compositionend', handleCompositionEnd)
+
     return () => {
-      kanaInput?.removeEventListener('input', syncKana)
+      nameInput.removeEventListener('compositionupdate', handleCompositionUpdate)
+      nameInput.removeEventListener('beforeinput', handleBeforeInput as any)
+      nameInput.removeEventListener('compositionend', handleCompositionEnd)
     }
   }, [])
 
@@ -62,7 +88,13 @@ function SignUp() {
         <label htmlFor="name">名前</label>
       </div>
       <div className="input-field">
-        <input id="nameKana" type="text" name="nameKana" onChange={handleChange} />
+        <input
+          id="nameKana"
+          type="text"
+          name="nameKana"
+          value={form.nameKana}
+          onChange={handleChange}
+        />
         <label htmlFor="nameKana">フリガナ</label>
       </div>
       <div className="input-field">
