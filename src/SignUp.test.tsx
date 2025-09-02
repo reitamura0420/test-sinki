@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import SignUp from './SignUp'
@@ -68,6 +68,32 @@ describe('SignUp IME input flow', () => {
     fireEvent.click(button)
     const kanaInput = screen.getByLabelText('フリガナ') as HTMLInputElement
     await waitFor(() => expect(kanaInput).toHaveValue('オオカワ'))
+  })
+
+  it('fills address field when postal code lookup button is clicked', async () => {
+    render(<SignUp />)
+    const zipInput = screen.getByLabelText('郵便番号') as HTMLInputElement
+    fireEvent.change(zipInput, {
+      target: { value: '1000001', name: 'postalCode' },
+    })
+    const mockFetch = vi.fn().mockResolvedValue({
+      json: async () => ({
+        status: 200,
+        results: [
+          { address1: '東京都', address2: '千代田区', address3: '千代田' },
+        ],
+      }),
+    })
+    const originalFetch = global.fetch
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(global as any).fetch = mockFetch
+    const button = screen.getByRole('button', { name: '住所自動補完' })
+    fireEvent.click(button)
+    const addressInput = screen.getByLabelText('住所') as HTMLInputElement
+    await waitFor(() =>
+      expect(addressInput).toHaveValue('東京都千代田区千代田'),
+    )
+    ;(global as any).fetch = originalFetch
   })
 })
 
