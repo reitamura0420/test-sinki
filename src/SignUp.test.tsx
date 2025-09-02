@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import SignUp from './SignUp'
 
@@ -42,6 +42,32 @@ describe('SignUp IME input flow', () => {
     // Step 4: compositionend produces kanji
     fireEvent.compositionEnd(nameInput, { data: '大川' })
     expect(kanaInput).toHaveValue('オオカワ')
+  })
+
+  it('converts kanji to kana when button is clicked', async () => {
+    interface MockKuroshiro {
+      init(): Promise<void>
+      convert(text: string): Promise<string>
+    }
+    ;(window as unknown as {
+      Kuroshiro?: new () => MockKuroshiro
+      KuromojiAnalyzer?: new () => unknown
+    }).Kuroshiro = class implements MockKuroshiro {
+      async init() {}
+      async convert(text: string) {
+        if (text === '大川') return 'オオカワ'
+        return ''
+      }
+    }
+    ;(window as unknown as { KuromojiAnalyzer?: new () => unknown }).KuromojiAnalyzer = class {}
+    render(<SignUp />)
+    await new Promise((r) => setTimeout(r, 0))
+    const nameInput = screen.getByLabelText('名前') as HTMLInputElement
+    fireEvent.change(nameInput, { target: { value: '大川', name: 'name' } })
+    const button = screen.getByRole('button', { name: 'カナ変換' })
+    fireEvent.click(button)
+    const kanaInput = screen.getByLabelText('フリガナ') as HTMLInputElement
+    await waitFor(() => expect(kanaInput).toHaveValue('オオカワ'))
   })
 })
 
